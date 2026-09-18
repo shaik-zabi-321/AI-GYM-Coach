@@ -1,0 +1,330 @@
+/* =========================================================
+   FONTS
+   Oswald: condensed industrial display — buttons, metric
+   labels, headings. This is the gym-poster/scoreboard face.
+   Barlow: same type family lineage as Oswald, built to pair,
+   but readable at body size — paragraphs, inputs, general copy.
+   JetBrains Mono: kept for metric VALUES (weights, reps,
+   timers) — the plate-loaded readout feel.
+========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Barlow:wght@400;500&display=swap');
+
+/* =========================================================
+   IRON YARD THEME
+   Concrete grays + oxide rust accent. Sharp corners.
+   Mono numerals for anything that reads like a number on
+   a barbell readout (metrics, timers, reps).
+========================================================= */
+
+:root {
+    --iy-bg: #0A0D14;
+    --iy-panel: #14161C;
+    --iy-card: #181A20;
+    --iy-line: #2B2D33;
+    --iy-line-dim: #1F2127;
+    --iy-text: #E8E4DC;
+    --iy-text-dim: #8A8580;
+    --iy-text-faint: #5C5852;
+    --iy-accent: #B8551F;
+    --iy-accent-dim: #8C4419;
+    --iy-mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* =========================================================
+   GLOBAL THEME
+========================================================= */
+
+.stApp {
+    background-color: var(--iy-bg);
+    color: var(--iy-text);
+}
+
+[data-testid="stSidebar"] {
+    background-color: var(--iy-panel);
+    border-right: 1px solid var(--iy-line-dim);
+}
+
+/* =========================================================
+   TYPOGRAPHY (SCOPED – safer)
+========================================================= */
+
+.block-container,
+.block-container * {
+    font-family: 'Barlow', sans-serif !important;
+}
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+.block-container {
+    padding: 50px 3rem !important;
+    max-width: 750px !important;
+}
+
+/* =========================================================
+   BUTTONS
+   Primary action = solid rust. Everything else stays
+   quiet concrete with a hairline border, no fill.
+========================================================= */
+
+button,
+.stButton button,
+.stDownloadButton button,
+.MuiBox-root button {
+    background-color: var(--iy-card) !important;
+    color: var(--iy-text) !important;
+    border: 1px solid var(--iy-line) !important;
+    border-radius: 0 !important;
+    font-family: 'Oswald', sans-serif !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em;
+    transition: border-color 0.15s ease;
+}
+
+button:hover,
+.stButton button:hover,
+.stDownloadButton button:hover {
+    border-color: var(--iy-accent-dim) !important;
+}
+
+/* Primary CTA — mark with kind="primary" in st.button(..., type="primary") */
+button[kind="primary"],
+button[data-testid="stBaseButton-primary"] {
+    background-color: var(--iy-accent) !important;
+    color: var(--iy-bg) !important;
+    border: 1px solid var(--iy-accent) !important;
+    font-weight: 500 !important;
+}
+
+button[kind="primary"]:hover,
+button[data-testid="stBaseButton-primary"]:hover {
+    background-color: var(--iy-accent-dim) !important;
+    border-color: var(--iy-accent-dim) !important;
+}
+
+/* =========================================================
+   INPUTS & TEXT ELEMENTS
+========================================================= */
+
+input,
+textarea,
+p,
+li,
+code,
+[data-testid="stSelectbox"]>div>div,
+[data-baseweb="select"]>div,
+[data-baseweb="popover"] ul,
+[data-baseweb="menu"] {
+    border-radius: 0 !important;
+    font-family: 'Barlow', sans-serif !important;
+}
+
+input,
+textarea,
+[data-baseweb="select"]>div {
+    background-color: var(--iy-card) !important;
+    border: 1px solid var(--iy-line) !important;
+    color: var(--iy-text) !important;
+}
+
+input:focus,
+textarea:focus,
+[data-baseweb="select"]>div:focus-within {
+    border-color: var(--iy-accent) !important;
+    box-shadow: none !important;
+}
+
+code {
+    color: var(--iy-accent);
+    background-color: var(--iy-card);
+}
+
+/* =========================================================
+   METRICS
+   Left-border stripe carries the accent instead of a full
+   outline. Value renders in mono, like a plate readout.
+========================================================= */
+
+[data-testid="stMetric"] {
+    background-color: var(--iy-card);
+    border: none;
+    border-left: 2px solid var(--iy-accent);
+    padding: 0.85rem 1.1rem;
+    border-radius: 0;
+}
+
+[data-testid="stMetric"] div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+[data-testid="stMetricValue"] {
+    font-family: var(--iy-mono) !important;
+    font-size: 1.5rem !important;
+    font-weight: 500 !important;
+    color: var(--iy-text) !important;
+}
+
+[data-testid="stMetricLabel"] {
+    font-family: 'Oswald', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.03em;
+    color: var(--iy-text-dim) !important;
+    opacity: 1;
+}
+
+[data-testid="stMetric"] div label p {
+    font-size: 16px !important;
+}
+
+/* Secondary / less critical metrics: dim the stripe.
+   Add class="iy-secondary" via st.markdown wrapper if needed. */
+.iy-secondary [data-testid="stMetric"] {
+    border-left: 2px solid var(--iy-line);
+}
+
+.iy-secondary [data-testid="stMetricValue"] {
+    color: var(--iy-text-dim) !important;
+}
+
+/* =========================================================
+   CONTAINERS / CARDS
+========================================================= */
+
+.stContainer,
+.stExpander,
+.stTabs,
+.stColumns,
+.stPopover,
+.stAlertContainer,
+.stStatusContainer,
+.stMetric,
+.stTable,
+.stDataFrame,
+.stForm,
+.stSelectbox,
+[data-baseweb="select"]>div,
+[data-testid="stForm"],
+[data-testid="stMetric"],
+[data-testid="stNumberInputContainer"],
+[data-testid="stDataFrameColumnMenu"],
+[data-testid="stHeadingWithActionElements"],
+[data-testid="stCaptionContainer"] p,
+[data-testid="stAlertContentInfo"] p,
+[data-testid="stSidebarNavLink"],
+[data-testid="stMarkdownContainer"] h3,
+[data-baseweb="popover"],
+[data-baseweb="menu"],
+div[role="menu"],
+div[role="menuitem"] {
+    border-radius: 0 !important;
+    font-family: 'Barlow', sans-serif !important;
+}
+
+.stExpander,
+[data-testid="stForm"] {
+    border: 1px solid var(--iy-line-dim) !important;
+    background-color: var(--iy-panel) !important;
+}
+
+/* =========================================================
+   DATAFRAME FIX
+========================================================= */
+
+.stDataFrame,
+.stDataFrame div,
+.stDataFrameGlideDataEditor {
+    border-radius: 0 !important;
+    font-family: 'Barlow', sans-serif !important;
+}
+
+.stDataFrame {
+    border: 1px solid var(--iy-line-dim) !important;
+}
+
+/* Numeric cell values in dataframes read as mono, matching metrics */
+.stDataFrameGlideDataEditor [role="gridcell"] {
+    font-family: var(--iy-mono) !important;
+}
+
+/* =========================================================
+   INTERACTIVE ELEMENTS
+========================================================= */
+
+.stTextInput,
+.stTextArea,
+.stNumberInput,
+.stSlider,
+.stMultiselect,
+.stRadio,
+.stCheckbox,
+.stToggle,
+.stFileUploader,
+.stColorPicker,
+.stDateInput,
+.stTimeInput,
+.stCameraInput,
+[data-testid="stTextInput"]>div,
+[data-testid="stButton"] button,
+[data-testid="stBaseButton-secondaryFormSubmit"],
+[data-testid="stStatusWidget"] {
+    border-radius: 0 !important;
+    font-family: 'Barlow', sans-serif !important;
+}
+
+/* Slider + toggle accent */
+[data-testid="stSlider"] [role="slider"] {
+    background-color: var(--iy-accent) !important;
+    border-color: var(--iy-accent) !important;
+}
+
+[data-testid="stSlider"] div[data-baseweb="slider"]>div>div {
+    background-color: var(--iy-accent) !important;
+}
+
+[data-baseweb="checkbox"] svg,
+[data-baseweb="radio"] svg {
+    fill: var(--iy-accent) !important;
+}
+
+/* =========================================================
+   MARKDOWN
+========================================================= */
+
+[data-testid="stMarkdownContainer"] strong {
+    font-family: 'Barlow', sans-serif !important;
+    color: var(--iy-text);
+}
+
+/* Headings — Oswald, condensed and slightly tracked out,
+   like a scoreboard header rather than a document title. */
+h1,
+h2,
+h3,
+[data-testid="stMarkdownContainer"] h1,
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3 {
+    font-family: 'Oswald', sans-serif !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em;
+    color: var(--iy-text) !important;
+}
+
+/* Inline numbers/timers written as `225 lb` in markdown code spans
+   pick up the mono treatment automatically via the `code` rule above. */
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.stForm {
+    margin-top: 2rem !important;
+    padding: 1.5rem 1rem !important;
+    background-color: var(--iy-card) !important;
+    border: 1px solid var(--iy-line-dim) !important;
+    color: var(--iy-text);
+}

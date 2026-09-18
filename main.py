@@ -4,6 +4,14 @@ from services.state.session_defaults import initial_session_defaults
 from services.config.workout_config import EXERCISE_OPTIONS
 
 
+def load_css(file_path: str):
+    with open(file_path) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+        st.markdown(
+            '<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Barlow:wght@400;500&display=swap" rel="stylesheet">',
+            unsafe_allow_html=True)
+
+
 def main():
     st.set_page_config(
         page_icon="🏋🏽",
@@ -13,6 +21,8 @@ def main():
 
 
     )
+    load_css("static/style.css")
+
     if not render_login_wall():
         return
     initial_session_defaults()
@@ -50,7 +60,7 @@ def main():
                 st.rerun()
         if workout_started:
             st.divider()
-            exercise = st.session_state.get("paln_exercise")
+            exercise = st.session_state.get("plan_exercise")
             total_reps = st.session_state.get("reps")
             current_set_reps = st.session_state.get("current_set_reps")
             reps_per_set = st.session_state.get("plan_reps")
