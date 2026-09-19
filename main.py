@@ -2,6 +2,7 @@ import streamlit as st
 from services.auth.login_wall import render_login_wall
 from services.state.session_defaults import initial_session_defaults
 from services.config.workout_config import EXERCISE_OPTIONS
+from services.persistence.exercise_repository import init_db
 
 
 def load_css(file_path: str):
@@ -22,6 +23,7 @@ def main():
 
     )
     load_css("static/style.css")
+    init_db()
 
     if not render_login_wall():
         return
