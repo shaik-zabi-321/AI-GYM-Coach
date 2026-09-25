@@ -93,4 +93,4 @@ def get_users_exercises(user_id):
     return conn.execute("""
         SELECT * FROM exercises 
         WHERE user_id = ?
-    """, (user_id)).fetchall()
+    """, (user_id,)).fetchall()
