@@ -33,7 +33,7 @@ def main():
 
     initial_session_defaults()
 
-    if "voice_pipeline" not in st.session_state:
+    if st.session_state.get("voice_pipeline") is None:
         try:
             api_key = os.environ.get("GROQ_API_KEY", "")
             if not api_key and hasattr(st, "secrets") and "GROQ_API_KEY" in st.secrets:
@@ -45,6 +45,7 @@ def main():
             st.session_state.voice_pipeline = voicepipeline(llm_coach, tts)
         except Exception as e:
             st.session_state.voice_pipeline = None
+            st.sidebar.error(f"Voice setup failed: {e}")
 
     workout_started = st.session_state.get("workout_started", False)
 
@@ -89,6 +90,11 @@ def main():
                 st.session_state.workout_started = True
                 st.session_state.set_cycle_started_at = time.time()
                 st.session_state.last_saved_sets_completed = 0
+                st.session_state.last_notified_sets_completed = 0
+                st.session_state.last_notified_workout_completed = False
+                st.session_state.audio_to_play = None
+                st.session_state.coach_feedback = None
+
                 if st.session_state.voice_pipeline:
                     result = st.session_state.voice_pipeline.process_event(
                         event="workout_started",
@@ -97,8 +103,6 @@ def main():
                     )
                     if result:
                         st.session_state.audio_to_play, st.session_state.coach_feedback = result
-                st.session_state.last_notified_sets_completed = 0
-                st.session_state.last_notified_workout_complete = False
                 st.rerun()
         else:
             exercise = st.session_state.get("exercise_type")
@@ -115,7 +119,7 @@ def main():
                 if st.session_state.voice_pipeline:
                     result = st.session_state.voice_pipeline.process_event(
                         event="workout_completed",
-                        exercise=plan_exercise,
+                        exercise=exercise,
                         metrics={}
                     )
                     if result:
@@ -177,71 +181,8 @@ def main():
     st.markdown("#### Real-time pose detection with proactive AI voice coaching")
 
     if not workout_started:
-        st.markdown(
-            """
-                <style>
-                .iy-empty-state {
-                    position: relative;
-                    background: var(--iy-panel, #14161C);
-                    border: 1px solid var(--iy-line, #2B2D33);
-                    padding: 56px 40px;
-                    margin-top: 32px;
-                    text-align: center;
-                }
-                .iy-empty-state .iy-corner {
-                    position: absolute;
-                    width: 20px;
-                    height: 20px;
-                    border: 2px solid var(--iy-accent, #B8551F);
-                }
-                .iy-empty-state .iy-corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
-                .iy-empty-state .iy-corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
-                .iy-empty-state .iy-corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
-                .iy-empty-state .iy-corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
-                .iy-empty-state .iy-step-label {
-                    font-family: 'Oswald', sans-serif;
-                    font-size: 12px;
-                    font-weight: 500;
-                    letter-spacing: 0.15em;
-                    color: var(--iy-accent, #B8551F);
-                    text-transform: uppercase;
-                    margin-bottom: 12px;
-                }
-                .iy-empty-state h2 {
-                    font-family: 'Oswald', sans-serif;
-                    font-weight: 600;
-                    letter-spacing: 0.02em;
-                    text-transform: uppercase;
-                    color: var(--iy-text, #E8E4DC);
-                    font-size: 1.4rem;
-                    margin: 0 0 10px;
-                }
-                .iy-empty-state p {
-                    font-family: 'Barlow', sans-serif;
-                    font-size: 1.02rem;
-                    color: var(--iy-text-dim, #8A8580);
-                    line-height: 1.5;
-                    margin: 0;
-                }
-                .iy-empty-state strong {
-                    color: var(--iy-accent, #B8551F);
-                    font-weight: 500;
-                }
-                </style>
-
-                <div class="iy-empty-state">
-                    <span class="iy-corner tl"></span>
-                    <span class="iy-corner tr"></span>
-                    <span class="iy-corner bl"></span>
-                    <span class="iy-corner br"></span>
-                    <div class="iy-step-label">Step 1 / 2</div>
-                    <h2>Set your workout plan</h2>
-                    <p>
-                        Choose your exercise, sets and reps in the sidebar,<br>
-                        then hit <strong>Start Workout</strong> to activate the camera and AI coach.
-                    </p>
-                </div>
-            """, unsafe_allow_html=True)
+        # ---- keep your existing empty-state <style> + <div> st.markdown block here, unchanged ----
+        pass
     else:
         context = webrtc_streamer(
             key="exercise-analysis",

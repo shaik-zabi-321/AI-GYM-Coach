@@ -6,7 +6,7 @@ class BicepsCurlDetector(BaseExercise):
     UP_THRESHOLD = 50
     DOWN_THRESHOLD = 160
     MIN_VISIBILITY = 0.7
-    ELBOW_DRIFT_TOLERANCE = 0.06
+    ELBOW_DRIFT_TOLERANCE = 0.12   # was 0.06, too strict for a front-facing camera
     SWING_THRESHOLD = 15
 
     LEFT_SHOULDER = 11
@@ -46,8 +46,11 @@ class BicepsCurlDetector(BaseExercise):
             self.get_point(landmarks, wrist_idx),
         )
 
-        key_landmarks_visible = landmarks[shoulder_idx].visibility > self.MIN_VISIBILITY and landmarks[
-            elbow_idx].visibility > self.MIN_VISIBILITY and landmarks[wrist_idx].visibility > self.MIN_VISIBILITY
+        key_landmarks_visible = (
+            landmarks[shoulder_idx].visibility > self.MIN_VISIBILITY
+            and landmarks[elbow_idx].visibility > self.MIN_VISIBILITY
+            and landmarks[wrist_idx].visibility > self.MIN_VISIBILITY
+        )
 
         if key_landmarks_visible:
             if elbow_angle < self.UP_THRESHOLD:
@@ -59,6 +62,7 @@ class BicepsCurlDetector(BaseExercise):
 
         shoulder_x = landmarks[shoulder_idx].x
         elbow_x = landmarks[elbow_idx].x
+
         elbow_drift = abs(elbow_x - shoulder_x)
 
         if elbow_drift <= self.ELBOW_DRIFT_TOLERANCE:
@@ -91,6 +95,7 @@ class BicepsCurlDetector(BaseExercise):
             "elbow_angle": int(elbow_angle),
             "shoulder_status": shoulder_status,
             "swing_status": swing_status,
+
         }
 
     def _safe_angle(self, dx, dy):

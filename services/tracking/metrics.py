@@ -1,8 +1,19 @@
-import streamlit as st
 import time
-from services.config.workout_config import METRICS_FIELDS
+
+import streamlit as st
+
 from services.config.workout_config import METRICS_FIELDS
 from services.persistence.exercise_repository import add_exercise
+
+
+def _speak(event, exercise, metrics):
+    pipeline = st.session_state.get("voice_pipeline")
+    if not pipeline:
+        return
+    result = pipeline.process_event(
+        event=event, exercise=exercise, metrics=metrics)
+    if result:
+        st.session_state.audio_to_play, st.session_state.coach_feedback = result
 
 
 def sync_metrics_update(context):
@@ -10,26 +21,22 @@ def sync_metrics_update(context):
         return
 
     processor = getattr(context, "video_processor", None)
-
     if not processor:
         return
 
     exercise = st.session_state.get("exercise_type")
-
     if not exercise:
         return
 
     processor.set_exercise(exercise)
     latest_metrics = processor.get_latest_metrics()
-
     if not latest_metrics:
         return
 
-    reps = latest_metrics.get("reps")
+    reps = latest_metrics.get("reps") or 0
     st.session_state.reps = reps
 
     fields = METRICS_FIELDS.get(exercise)
-
     if not fields:
         return
 
@@ -55,52 +62,33 @@ def sync_metrics_update(context):
     last_saved_sets = st.session_state.get("last_saved_sets_completed", 0)
 
     if target_sets > 0 and reps_per_set > 0 and sets_completed > last_saved_sets:
-        newly_completed = sets_completed-last_saved_sets
+        newly_completed = sets_completed - last_saved_sets
         now_ts = time.time()
         started_at = st.session_state.get("set_cycle_started_at", now_ts)
-        time_taken = now_ts-started_at
+        time_taken = now_ts - started_at
         user_id = st.session_state.get("user_id", 0)
-        add_exercise(user_id, exercise, newly_completed *
-                     reps_per_set, newly_completed, time_taken)
-        if st.session_state.get("voice_pipeline"):
-            result = st.session_state.voice_pipeline.process_event(
-                event="set_completed",
-                exercise=exercise,
-                metrics=latest_metrics
-            )
-            if result:
-                st.session_state.audio_to_play, st.session_state.coach_feedback = result
+
+        add_exercise(user_id, exercise, newly_completed * reps_per_set,
+                     newly_completed, time_taken)
+
+        # On the final set, the workout_completed message below replaces this one
+        if not workout_completed:
+            _speak("set_completed", exercise, latest_metrics)
 
         st.session_state.set_cycle_started_at = now_ts
         st.session_state.last_saved_sets_completed = sets_completed
 
     if workout_completed and not st.session_state.get("last_notified_workout_completed"):
         st.session_state.last_notified_workout_completed = True
-        if st.session_state.get("voice_pipeline"):
-            result = st.session_state.voice_pipeline.process_event(
-                event="workout_completed",
-                exercise=exercise,
-                metrics=latest_metrics
-            )
-            if result:
-                st.session_state.audio_to_play, st.session_state.coach_feedback = result
+        _speak("workout_completed", exercise, latest_metrics)
+        return
 
     pose_detected = latest_metrics.get("pose_detected", True)
-    if not pose_detected and st.session_state.get("voice_pipeline"):
-        result = st.session_state.voice_pipeline.process_event(
-            event="no_pose_detected",
-            exercise=exercise,
-            metrics={
-                "issue": "No pose detected. step into the camera frame and ensure your full body is visible."}
+    if not pose_detected:
+        _speak(
+            "no_pose_detected",
+            exercise,
+            {"issue": "No pose detected. Step into the camera frame and make sure your full body is visible."},
         )
-        if result:
-            st.session_state.audio_to_play, st.session_state.coach_feedback = result
-
-    if st.session_state.get("voice_pipeline"):
-        result = st.session_state.voice_pipeline.process_event(
-            event="ongoing_form_check",
-            exercise=exercise,
-            metrics=latest_metrics
-        )
-        if result:
-            st.session_state.audio_to_play, st.session_state.coach_feedback = result
+    else:
+        _speak("ongoing_form_check", exercise, latest_metrics)
